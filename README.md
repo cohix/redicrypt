@@ -4,8 +4,23 @@ A LetsEncrypt cert cache for redis
 
 redicrypt is a drop-in replacement for the default `autocert.DirCache` in the `acme` package.
 
-Example:
+### Install:
 ```
+go get github.com/cohix/redicrypt
+```
+OR:
+```
+gvt fetch github.com/cohix/redicrypt
+```
+
+### Example:
+```
+import (
+	"github.com/cohix/redicrypt"
+)
+
+[...]
+
 certCache, err := redicrypt.RediCryptWithAddr("redis:6739")
 if err != nil {
 	os.Exit(1)
