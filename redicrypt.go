@@ -41,8 +41,10 @@ func (rc *RediCrypt) Get(ctx context.Context, name string) ([]byte, error) {
 
 		data, err = redis.String(rc.Conn.Do("GET", key))
 		if err == redis.ErrNil {
-			done <- nil
+			fmt.Println("redicrypt: Get encountered ErrNil")
+			done <- autocert.ErrCacheMiss
 		} else {
+			fmt.Println("redicrypt: encountered redis error: " + err.Error())
 			done <- err
 		}
 	}()
@@ -52,12 +54,8 @@ func (rc *RediCrypt) Get(ctx context.Context, name string) ([]byte, error) {
 		return nil, ctx.Err()
 	case err := <-done:
 		if err != nil {
-			return nil, errors.Wrap(err, "Get failed to redis.String")
+			return nil, err
 		}
-	}
-
-	if data == "" {
-		return nil, autocert.ErrCacheMiss
 	}
 
 	certBytes, err := base64.StdEncoding.DecodeString(data)
@@ -65,6 +63,7 @@ func (rc *RediCrypt) Get(ctx context.Context, name string) ([]byte, error) {
 		return nil, errors.Wrap(err, "Get failed to DecodeString")
 	}
 
+	fmt.Println("redicrypt: fetched cert with key " + key)
 	return certBytes, nil
 }
 
@@ -89,10 +88,12 @@ func (rc *RediCrypt) Put(ctx context.Context, name string, data []byte) error {
 		return ctx.Err()
 	case err := <-done:
 		if err != nil {
+			fmt.Println("redicrypt: encountered redis error: " + err.Error())
 			return errors.Wrap(err, "Put failed to Do")
 		}
 	}
 
+	fmt.Println("redicrypt: wrote cert to redis with key: " + key)
 	return nil
 }
 
