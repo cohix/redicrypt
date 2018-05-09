@@ -6,8 +6,13 @@ redicrypt is a drop-in replacement for the default `autocert.DirCache` in the `a
 
 Example:
 ```
+certCache, err := redicrypt.RediCryptWithAddr("redis:6739")
+if err != nil {
+	os.Exit(1)
+}
+
 m := &autocert.Manager{
-	Cache:      redicrypt.RediCryptWithAddr("redis:6379"),
+	Cache:      certCache,
 	Prompt:     autocert.AcceptTOS,
 	HostPolicy: autocert.HostWhitelist(hosts...),
 }

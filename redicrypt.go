@@ -38,8 +38,13 @@ func (rc *RediCrypt) Get(ctx context.Context, name string) ([]byte, error) {
 
 	go func() {
 		var err error
+
 		data, err = redis.String(rc.Conn.Do("GET", key))
-		done <- err
+		if err == redis.ErrNil {
+			done <- nil
+		} else {
+			done <- err
+		}
 	}()
 
 	select {
