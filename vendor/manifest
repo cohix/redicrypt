@@ -26,15 +26,6 @@
 			"revision": "816c9085562cd7ee03e7f8188a1cfd942858cded",
 			"branch": "master",
 			"notests": true
-		},
-		{
-			"importpath": "golang.org/x/crypto/acme",
-			"repository": "https://go.googlesource.com/crypto",
-			"vcs": "git",
-			"revision": "21052ae46654ecf18dfdba0f7c12701a1e2b3164",
-			"branch": "master",
-			"path": "/acme",
-			"notests": true
 		}
 	]
 }
