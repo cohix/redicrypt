@@ -32,6 +32,7 @@ func RediCryptWithAddr(addr string) (*RediCrypt, error) {
 // Get reads a certificate data from redis.
 func (rc *RediCrypt) Get(ctx context.Context, name string) ([]byte, error) {
 	key := redisKeyForName(name)
+	fmt.Println("redicrypt: getting cert for key " + key)
 
 	data := ""
 	done := make(chan error)
@@ -70,6 +71,8 @@ func (rc *RediCrypt) Get(ctx context.Context, name string) ([]byte, error) {
 // Put writes the certificate data to redis.
 func (rc *RediCrypt) Put(ctx context.Context, name string, data []byte) error {
 	key := redisKeyForName(name)
+	fmt.Println("redicrypt: writing cert for key ", key)
+
 	encodedData := base64.StdEncoding.EncodeToString(data)
 	done := make(chan error)
 
