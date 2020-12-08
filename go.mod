@@ -1,4 +1,4 @@
-module github.com/agilebits/redicrypt
+module github.com/cohix/redicrypt
 
 go 1.14
 
