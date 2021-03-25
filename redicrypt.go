@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/base64"
 	"fmt"
+	"io"
 
 	"github.com/gomodule/redigo/redis"
 	"github.com/pkg/errors"
@@ -11,8 +12,9 @@ import (
 )
 
 type RediCrypt struct {
-	Addr string
-	Conn redis.Conn
+	Addr   string
+	Conn   redis.Conn
+	Logger io.Writer
 }
 
 func RediCryptWithAddr(addr string) (*RediCrypt, error) {
@@ -32,7 +34,7 @@ func RediCryptWithAddr(addr string) (*RediCrypt, error) {
 // Get reads certificate data from redis.
 func (rc *RediCrypt) Get(ctx context.Context, name string) ([]byte, error) {
 	key := redisKeyForName(name)
-	fmt.Println("redicrypt: getting cert for key " + key)
+	rc.log("getting cert for key " + key)
 
 	data := ""
 	done := make(chan error)
@@ -68,7 +70,7 @@ func (rc *RediCrypt) Get(ctx context.Context, name string) ([]byte, error) {
 // Put writes certificate data to redis.
 func (rc *RediCrypt) Put(ctx context.Context, name string, data []byte) error {
 	key := redisKeyForName(name)
-	fmt.Println("redicrypt: writing cert for key ", key)
+	rc.log("writing cert for key " + key)
 
 	encodedData := base64.StdEncoding.EncodeToString(data)
 	done := make(chan error)
@@ -98,6 +100,8 @@ func (rc *RediCrypt) Put(ctx context.Context, name string, data []byte) error {
 // Delete removes the specified redis key.
 func (rc *RediCrypt) Delete(ctx context.Context, name string) error {
 	key := redisKeyForName(name)
+	rc.log("removing cert for key " + key)
+
 	done := make(chan error)
 
 	go func() {
@@ -115,6 +119,20 @@ func (rc *RediCrypt) Delete(ctx context.Context, name string) error {
 	}
 
 	return nil
+}
+
+// log writes to the io.Writer defined by Logger or standard out if Logger is not set.
+// All input values are prefixed with "redicrypt: ".
+func (rc *RediCrypt) log(input string) {
+	if input == "" {
+		return
+	}
+	output := fmt.Sprintf("redicrypt: %s", input)
+	if rc == nil || rc.Logger == nil {
+		fmt.Println(output)
+		return
+	}
+	rc.Logger.Write([]byte(output))
 }
 
 func redisKeyForName(name string) string {
